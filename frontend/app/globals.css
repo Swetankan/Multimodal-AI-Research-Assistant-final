@@ -96,3 +96,41 @@ select {
 .glow-accent {
   box-shadow: 0 0 20px var(--accent-glow), 0 0 40px rgba(16, 185, 129, 0.06);
 }
+
+/* ── Premium range slider ── */
+.slider-emerald {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.08);
+  outline: none;
+  cursor: pointer;
+}
+
+.slider-emerald::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+  cursor: pointer;
+  transition: box-shadow 0.15s, transform 0.15s;
+}
+
+.slider-emerald::-webkit-slider-thumb:hover {
+  box-shadow: 0 0 0 5px rgba(16, 185, 129, 0.28);
+  transform: scale(1.18);
+}
+
+.slider-emerald::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border: none;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+  cursor: pointer;
+}
