@@ -47,6 +47,30 @@ export function MarkdownRenderer({ content }: { content: string }) {
               </blockquote>
             );
           },
+          table({ children }) {
+            return (
+              <div className="my-6 overflow-x-auto rounded-xl border border-white/10 bg-white/[0.02] shadow-[0_4px_30px_rgba(0,0,0,0.1)] backdrop-blur">
+                <table className="w-full border-collapse text-left text-sm text-slate-300">
+                  {children}
+                </table>
+              </div>
+            );
+          },
+          thead({ children }) {
+            return <thead className="border-b border-white/10 bg-white/[0.04] text-xs font-semibold uppercase tracking-wider text-slate-200">{children}</thead>;
+          },
+          tbody({ children }) {
+            return <tbody className="divide-y divide-white/5">{children}</tbody>;
+          },
+          tr({ children }) {
+            return <tr className="hover:bg-white/[0.01] transition-colors">{children}</tr>;
+          },
+          th({ children }) {
+            return <th className="px-4 py-3 font-semibold border-r border-white/5 last:border-r-0 text-white bg-white/[0.02]">{children}</th>;
+          },
+          td({ children }) {
+            return <td className="px-4 py-3 leading-6 border-r border-white/5 last:border-r-0 align-top">{children}</td>;
+          },
           code(props) {
             const { children, className } = props;
             const match = /language-(\w+)/.exec(className ?? "");

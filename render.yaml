@@ -8,3 +8,12 @@ services:
     startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /
     autoDeploy: true
+    envVars:
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: MAX_UPLOAD_BYTES
+        value: "15728640"
+      - key: MODEL_TIMEOUT_SECONDS
+        value: "45"
+      - key: FRONTEND_ORIGINS
+        value: "https://*.vercel.app"

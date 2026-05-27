@@ -19,6 +19,12 @@ out/
 # Local platform state
 .vercel/
 
+# Local generated report/test artifacts
+77_2312res902_Swetankan.pdf
+Capstone_II_MidSem_Report_Group_77.docx
+workflow_flowchart*.svg
+write_test.txt
+
 # OS
 .DS_Store
 desktop.ini

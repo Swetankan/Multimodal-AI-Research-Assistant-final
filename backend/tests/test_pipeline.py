@@ -8,8 +8,16 @@ class StubVectorStore:
     def __init__(self, results: list[RetrievedChunk] | None = None) -> None:
         self.results = results or []
 
-    def search(self, query: str, top_k: int = 4) -> list[RetrievedChunk]:
-        del query, top_k
+    def search(
+        self,
+        query: str,
+        top_k: int = 4,
+        document_ids: list[str] | None = None,
+        dense_weight: float = 0.72,
+        bm25_weight: float = 0.28,
+        candidate_pool_size: int | None = None,
+    ) -> list[RetrievedChunk]:
+        del query, top_k, document_ids, dense_weight, bm25_weight, candidate_pool_size
         return self.results
 
     def describe(self) -> dict[str, object]:

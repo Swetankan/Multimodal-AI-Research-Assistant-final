@@ -1,8 +1,10 @@
 "use client";
 
-import { Bot, PanelLeftClose, PanelLeftOpen, SlidersHorizontal, X } from "lucide-react";
-import { ModelProvider } from "@/lib/api";
+import { Bot, FileText, PanelLeftClose, PanelLeftOpen, SlidersHorizontal, X } from "lucide-react";
+import { DocumentMetadata, ModelProvider } from "@/lib/api";
 import { cn } from "@/lib/utils";
+
+export type QueryMode = "current" | "selected" | "all";
 
 interface SidebarProps {
   provider: ModelProvider;
@@ -10,6 +12,12 @@ interface SidebarProps {
   models: string[];
   chunkSize: number;
   topK: number;
+  denseWeight: number;
+  bm25Weight: number;
+  candidatePoolSize: number;
+  documents: DocumentMetadata[];
+  selectedDocumentIds: string[];
+  queryMode: QueryMode;
   isOpen: boolean;
   isCollapsed: boolean;
   onClose: () => void;
@@ -18,6 +26,11 @@ interface SidebarProps {
   onModelChange: (value: string) => void;
   onChunkSizeChange: (value: number) => void;
   onTopKChange: (value: number) => void;
+  onDenseWeightChange: (value: number) => void;
+  onBm25WeightChange: (value: number) => void;
+  onCandidatePoolSizeChange: (value: number) => void;
+  onDocumentSelectionChange: (documentIds: string[]) => void;
+  onQueryModeChange: (value: QueryMode) => void;
 }
 
 export function Sidebar({
@@ -26,6 +39,12 @@ export function Sidebar({
   models,
   chunkSize,
   topK,
+  denseWeight,
+  bm25Weight,
+  candidatePoolSize,
+  documents,
+  selectedDocumentIds,
+  queryMode,
   isOpen,
   isCollapsed,
   onClose,
@@ -33,8 +52,21 @@ export function Sidebar({
   onProviderChange,
   onModelChange,
   onChunkSizeChange,
-  onTopKChange
+  onTopKChange,
+  onDenseWeightChange,
+  onBm25WeightChange,
+  onCandidatePoolSizeChange,
+  onDocumentSelectionChange,
+  onQueryModeChange
 }: SidebarProps) {
+  const selectedDocuments = new Set(selectedDocumentIds);
+  const toggleDocument = (documentId: string) => {
+    const next = selectedDocuments.has(documentId)
+      ? selectedDocumentIds.filter((item) => item !== documentId)
+      : [...selectedDocumentIds, documentId];
+    onDocumentSelectionChange(next);
+  };
+
   return (
     <>
       <div
@@ -104,6 +136,58 @@ export function Sidebar({
             </p>
 
             <div className="space-y-4">
+              {documents.length > 0 ? (
+                <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+                  <label className="mb-3 flex items-center gap-2 text-sm font-medium text-slate-200">
+                    <FileText className="h-4 w-4 text-accent" />
+                    Documents
+                  </label>
+                  <div className="space-y-2">
+                    <div className="grid grid-cols-3 gap-1 rounded-2xl border border-white/8 bg-black/20 p-1 text-xs">
+                      {([
+                        ["current", "Current"],
+                        ["selected", "Selected"],
+                        ["all", "All"]
+                      ] as const).map(([value, label]) => (
+                        <button
+                          key={value}
+                          type="button"
+                          className={cn(
+                            "rounded-xl px-2 py-2 text-slate-300 transition hover:bg-white/8",
+                            queryMode === value && "bg-accent/15 text-accent"
+                          )}
+                          onClick={() => onQueryModeChange(value)}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+
+                    {documents.map((document) => (
+                      <label
+                        key={document.document_id}
+                        className="flex cursor-pointer items-start gap-3 rounded-2xl border border-white/8 bg-black/15 p-3 text-sm text-slate-200 transition hover:bg-white/[0.05]"
+                      >
+                        <input
+                          type="checkbox"
+                          className="mt-1 accent-[#9AE6B4]"
+                          checked={selectedDocuments.has(document.document_id)}
+                          onChange={() => toggleDocument(document.document_id)}
+                        />
+                        <span className="min-w-0">
+                          <span className="block truncate">{document.filename}</span>
+                          <span className="mt-1 block text-xs text-slate-500">
+                            {document.chunk_count} chunks
+                            {document.extraction?.total_pages ? ` | ${document.extraction.total_pages} pages` : ""}
+                            {document.extraction?.empty_pages?.length ? ` | ${document.extraction.empty_pages.length} empty` : ""}
+                          </span>
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+
               <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-4">
                 <label className="mb-3 flex items-center gap-2 text-sm font-medium text-slate-200">
                   <Bot className="h-4 w-4 text-accent" />
@@ -167,6 +251,68 @@ export function Sidebar({
                   className="mt-4 w-full accent-[#9AE6B4]"
                   onChange={(event) => onTopKChange(Number(event.target.value))}
                 />
+              </div>
+
+              <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+                <label className="mb-3 flex items-center gap-2 text-sm font-medium text-slate-200">
+                  <SlidersHorizontal className="h-4 w-4 text-accent" />
+                  Hybrid retrieval
+                </label>
+
+                <div className="space-y-4">
+                  <div>
+                    <div className="flex items-center justify-between text-sm text-slate-200">
+                      <span>Dense weight</span>
+                      <span className="font-[family-name:var(--font-mono)] text-accent">{denseWeight.toFixed(2)}</span>
+                    </div>
+                    <input
+                      type="range"
+                      min={0}
+                      max={1}
+                      step={0.05}
+                      value={denseWeight}
+                      className="mt-3 w-full accent-[#9AE6B4]"
+                      onChange={(event) => onDenseWeightChange(Number(event.target.value))}
+                    />
+                  </div>
+
+                  <div>
+                    <div className="flex items-center justify-between text-sm text-slate-200">
+                      <span>BM25 weight</span>
+                      <span className="font-[family-name:var(--font-mono)] text-accent">{bm25Weight.toFixed(2)}</span>
+                    </div>
+                    <input
+                      type="range"
+                      min={0}
+                      max={1}
+                      step={0.05}
+                      value={bm25Weight}
+                      className="mt-3 w-full accent-[#9AE6B4]"
+                      onChange={(event) => onBm25WeightChange(Number(event.target.value))}
+                    />
+                  </div>
+
+                  <div>
+                    <div className="flex items-center justify-between text-sm text-slate-200">
+                      <span>Candidate pool</span>
+                      <span className="font-[family-name:var(--font-mono)] text-accent">{candidatePoolSize}</span>
+                    </div>
+                    <input
+                      type="range"
+                      min={8}
+                      max={60}
+                      step={4}
+                      value={candidatePoolSize}
+                      className="mt-3 w-full accent-[#9AE6B4]"
+                      onChange={(event) => onCandidatePoolSizeChange(Number(event.target.value))}
+                    />
+                  </div>
+
+                  <label className="flex items-center justify-between gap-3 text-sm text-slate-400">
+                    <span>Reranker</span>
+                    <input type="checkbox" disabled className="accent-[#9AE6B4] opacity-50" />
+                  </label>
+                </div>
               </div>
             </div>
           </div>

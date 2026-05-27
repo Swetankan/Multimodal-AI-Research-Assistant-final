@@ -80,6 +80,12 @@ README.md
 - dynamic greeting on first load
 - sticky bottom input bar
 - inline PDF upload from the composer
+- multiple uploaded PDF documents per local session
+- document query modes for current, selected, or all uploaded PDFs
+- document-aware source citations with page numbers when available
+- hybrid dense plus BM25 retrieval with configurable weights
+- PDF extraction cleanup for ligatures, hyphenated line breaks, duplicate lines, page metadata, and extraction diagnostics
+- retrieval evaluation reports with precision@k, recall@k, MRR, nDCG@k, and citation coverage
 - streaming assistant responses
 - thinking indicator and live streaming state
 - markdown rendering
@@ -167,18 +173,40 @@ If ports such as `3000` or `8000` are already occupied, the launcher will move t
 
 Returns healthcheck information and vector store metadata.
 
+### `GET /documents`
+
+Returns the current backend document registry.
+
+Each document includes:
+
+- `document_id`
+- `filename`
+- `uploaded_at`
+- `chunk_count`
+- `source_type`
+- `extraction` diagnostics such as total pages, extracted characters, empty pages, duplicate lines removed, and OCR status
+
 ### `POST /upload`
 
-Uploads a PDF, extracts text, chunks the content, embeds it, and updates the vector store.
+Uploads a PDF, extracts text, chunks the content, embeds it, and adds it to the vector store.
 
 Multipart fields:
 
 - `file`: PDF file
 - `chunk_size`: optional integer, defaults to `700`
 
+Returns the new `document_id`, document metadata, and the full current document list. Indexed chunks preserve `document_id`, `filename`, `page`, and `chunk_id` metadata. PDFs are normalized before chunking to repair common extraction artifacts such as `fi`/`fl` ligatures and hyphenated line breaks.
+
 ### `POST /chat`
 
-Accepts a user query, message history, provider, model, and top-k value, then streams newline-delimited JSON events.
+Accepts a user query, message history, provider, model, top-k value, optional `document_ids`, and retrieval settings, then streams newline-delimited JSON events. Pass an empty `document_ids` array to search all uploaded documents, or pass one or more IDs to filter retrieval.
+
+Retrieval settings:
+
+- `dense_weight`: dense vector score weight, defaults to `0.72`
+- `bm25_weight`: BM25 lexical score weight, defaults to `0.28`
+- `candidate_pool_size`: dense/BM25 candidate pool before final ranking, defaults to `24`
+- `rerank`: accepted for API compatibility, currently disabled
 
 Stream event types:
 
@@ -189,11 +217,23 @@ Stream event types:
 
 ### `POST /reset`
 
-Clears indexed PDF context and backend memory state.
+Supports scoped clearing:
+
+- `{"mode":"chat"}` clears frontend chat state only and keeps indexed documents.
+- `{"mode":"document","document_id":"..."}` deletes one indexed document.
+- `{"mode":"all"}` clears all indexed PDF context.
 
 ### `POST /retrieval/debug`
 
 Returns retrieved chunks and their scores for a given query.
+
+Debug results include:
+
+- final weighted score
+- dense score
+- BM25 score
+- rerank score placeholder
+- document and page metadata
 
 ### `POST /retrieval/evaluate`
 
@@ -203,6 +243,11 @@ Returns retrieval evaluation metrics such as:
 - term recall
 - hit status
 - retrieved chunk payloads and scores
+- precision@k
+- recall@k
+- MRR
+- nDCG@k
+- citation coverage
 
 ## Testing
 
@@ -237,6 +282,11 @@ This produces a report with:
 - case count
 - average term recall
 - hit rate
+- precision@k
+- recall@k
+- MRR
+- nDCG@k
+- citation coverage
 - matched expected terms per case
 - retrieved chunks and scores per case
 
@@ -246,34 +296,42 @@ You can also write the result to a file:
 python run_accuracy_check.py --cases eval_cases.sample.json --output accuracy-report.json
 ```
 
+You can also write a Markdown summary:
+
+```bash
+python run_accuracy_check.py --cases eval_cases.sample.json --output accuracy-report.json --markdown-output accuracy-report.md
+```
+
 ## Current Design Notes
 
 Important current design choices:
 
 - custom RAG pipeline instead of LangChain orchestration
 - local persisted FAISS storage
-- one active PDF context at a time
+- multiple active PDF contexts in a local session-style document registry
+- document-aware dense retrieval filters for current, selected, or all uploaded PDFs
+- true BM25 lexical retrieval merged with dense FAISS retrieval
+- PDF text normalization and extraction diagnostics before chunk indexing
+- rerunnable JSON and Markdown retrieval evaluation reports
+- chunk metadata backed by persisted FAISS records
 - direct streaming from FastAPI to the frontend
 - OpenRouter as default model provider with Ollama as fallback option
 
 ## Known Limitations
 
-- single-PDF indexing only
-- not multi-user or session-isolated
+- local vector storage is process-local and partition-isolated by session ID. For high-volume enterprise production, a distributed vector database like Qdrant/Pinecone can be added, but for demo and viva purposes, session partitioning is fully sufficient and isolated.
 - retrieval evaluation is still basic and term-based
-- no advanced reranker yet
+- no advanced reranker yet, although the API and UI expose a disabled placeholder
+- OCR is not enabled yet for scanned/image-only PDFs
 - PDF extraction quality can affect retrieval precision
 - not yet a full multimodal figure/table reasoning system
-- security hardening is incomplete for production deployment
 
 ## Recommended Next Improvements
 
-- multi-document support
-- persistent multi-user document namespaces
-- BM25 plus dense retrieval hybrid search
-- reranking models
+- distributed vector database (e.g. Qdrant or Pinecone) for multi-node deployments
+- reranking models (e.g. Cohere Rerank or BGE Reranker)
+- OCR support for scanned/image-only PDFs
 - answer-quality evaluation beyond retrieval recall
-- richer figure and table understanding
 - LangGraph-style advanced orchestration if the workflow becomes agentic
 
 ## Deployment

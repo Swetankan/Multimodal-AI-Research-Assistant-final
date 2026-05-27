@@ -3,7 +3,8 @@
     "name": "paper-summary",
     "query": "What benchmark results does the paper report?",
     "expected_terms": ["benchmark", "results", "dataset"],
-    "top_k": 4
+    "top_k": 4,
+    "expected_document_ids": []
   },
   {
     "name": "methodology",
@@ -16,5 +17,19 @@
     "query": "Does the paper include an ablation study or error analysis?",
     "expected_terms": ["ablation", "analysis", "study"],
     "top_k": 5
+  },
+  {
+    "name": "limitations",
+    "query": "What limitations or threats to validity are discussed?",
+    "expected_terms": ["limitation", "validity", "future"],
+    "top_k": 5
+  },
+  {
+    "name": "dataset-and-metrics",
+    "query": "Which datasets, metrics, and baselines are used?",
+    "expected_terms": ["dataset", "metric", "baseline"],
+    "top_k": 6,
+    "dense_weight": 0.6,
+    "bm25_weight": 0.4
   }
 ]

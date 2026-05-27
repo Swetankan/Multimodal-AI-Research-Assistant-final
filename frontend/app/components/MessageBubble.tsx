@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, FileText, Sparkles, User2 } from "lucide-react";
+import { ChevronDown, Download, FileText, Sparkles, User2 } from "lucide-react";
 import { ChatMessage } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { MarkdownRenderer } from "./MarkdownRenderer";
@@ -67,11 +67,33 @@ export function MessageBubble({ message }: { message: ChatMessage }) {
               {message.content}
             </p>
           ) : (
-            <div>
+            <div className="relative group/bubble">
               <MarkdownRenderer content={message.content} />
               {message.streaming ? (
                 <div className="mt-2 flex items-center">
                   <StreamingCursor />
+                </div>
+              ) : null}
+              {!message.thinking && !message.streaming && message.content ? (
+                <div className="mt-3 flex items-center justify-end border-t border-white/5 pt-2 opacity-0 group-hover/bubble:opacity-100 transition-opacity">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const blob = new Blob([message.content], { type: "text/markdown;charset=utf-8;" });
+                      const url = URL.createObjectURL(blob);
+                      const link = document.createElement("a");
+                      link.href = url;
+                      link.setAttribute("download", `research-summary-${message.id}.md`);
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                    }}
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-2.5 py-1.5 text-[11px] text-slate-300 hover:bg-white/10 hover:text-white transition"
+                    title="Export response to Markdown"
+                  >
+                    <Download className="h-3.5 w-3.5" />
+                    <span>Export Markdown</span>
+                  </button>
                 </div>
               ) : null}
             </div>
@@ -90,8 +112,34 @@ export function MessageBubble({ message }: { message: ChatMessage }) {
             <div className="space-y-3 border-t border-white/10 px-4 py-4">
               {message.sources.map((source) => (
                 <div key={source.id} className="rounded-2xl border border-white/10 bg-black/20 p-4">
-                  <div className="mb-2 text-[11px] uppercase tracking-[0.18em] text-slate-400">
-                    Relevance {source.score.toFixed(3)}
+                  <div className="mb-2 flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-slate-400">
+                    {source.filename ? (
+                      <span className="truncate max-w-[200px]">{source.filename}</span>
+                    ) : null}
+                    {source.filename ? <span>|</span> : null}
+                    {source.page ? <span>Page {source.page} |</span> : null}
+                    <span>Relevance {source.score.toFixed(3)}</span>
+                    {source.source_type && source.source_type !== "text" ? (
+                      <span className={cn(
+                        "ml-auto rounded-full px-2 py-0.5 text-[9px] font-semibold tracking-normal normal-case border",
+                        source.source_type === "table"
+                          ? "border-blue-400/20 bg-blue-400/10 text-blue-300"
+                          : "border-purple-400/20 bg-purple-400/10 text-purple-300"
+                      )}>
+                        {source.source_type === "table" ? "Table" : "Figure Caption"}
+                      </span>
+                    ) : null}
+                  </div>
+                  <div className="mb-3 flex flex-wrap gap-2 text-[11px] text-slate-500">
+                    {typeof source.dense_score === "number" ? (
+                      <span>Dense {source.dense_score.toFixed(3)}</span>
+                    ) : null}
+                    {typeof source.bm25_score === "number" ? (
+                      <span>BM25 {source.bm25_score.toFixed(3)}</span>
+                    ) : null}
+                    {typeof source.rerank_score === "number" ? (
+                      <span>Rerank {source.rerank_score.toFixed(3)}</span>
+                    ) : null}
                   </div>
                   <p className="m-0 whitespace-pre-wrap leading-6 text-slate-300">
                     {source.text}
