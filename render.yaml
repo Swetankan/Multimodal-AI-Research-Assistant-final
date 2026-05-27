@@ -6,14 +6,30 @@ services:
     rootDir: backend
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
-    healthCheckPath: /
+    healthCheckPath: /health
     autoDeploy: true
     envVars:
       - key: OPENROUTER_API_KEY
         sync: false
+      - key: OPENROUTER_BASE_URL
+        value: "https://openrouter.ai/api/v1"
+      - key: OPENROUTER_MODEL
+        value: "openai/gpt-4o-mini"
+      - key: OPENROUTER_APP_NAME
+        value: "Multimodal AI Research Assistant"
+      - key: EMBEDDING_MODEL
+        value: "sentence-transformers/all-MiniLM-L6-v2"
       - key: MAX_UPLOAD_BYTES
         value: "15728640"
       - key: MODEL_TIMEOUT_SECONDS
         value: "45"
       - key: FRONTEND_ORIGINS
         value: "https://*.vercel.app"
+      - key: LANGSMITH_TRACING
+        value: "false"
+      - key: LANGSMITH_API_KEY
+        sync: false
+      - key: LANGSMITH_PROJECT
+        value: "capstone2draft2"
+      - key: LANGSMITH_ENDPOINT
+        value: "https://api.smith.langchain.com"
