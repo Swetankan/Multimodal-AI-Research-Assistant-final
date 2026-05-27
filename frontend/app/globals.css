@@ -4,6 +4,11 @@
 
 :root {
   color-scheme: dark;
+  --accent: 16 185 129;       /* emerald-500 */
+  --accent-glow: rgba(16, 185, 129, 0.18);
+  --surface: rgba(255, 255, 255, 0.04);
+  --surface-hover: rgba(255, 255, 255, 0.08);
+  --border: rgba(255, 255, 255, 0.08);
 }
 
 * {
@@ -21,23 +26,27 @@ body {
   margin: 0;
   min-height: 100vh;
   background:
-    radial-gradient(circle at top left, rgba(61, 131, 97, 0.16), transparent 28%),
-    radial-gradient(circle at top right, rgba(64, 115, 219, 0.12), transparent 24%),
-    linear-gradient(180deg, #090a0e 0%, #0b0f16 52%, #09090b 100%);
-  color: #f4f7fb;
+    radial-gradient(ellipse 80% 50% at 20% -10%, rgba(16, 185, 129, 0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 85% 10%, rgba(99, 102, 241, 0.10) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 60% at 50% 100%, rgba(16, 185, 129, 0.06) 0%, transparent 70%),
+    linear-gradient(160deg, #050608 0%, #080c12 40%, #070810 70%, #050608 100%);
+  color: #f1f5f9;
+  position: relative;
 }
 
-body::before {
+/* Subtle noise texture overlay */
+body::after {
   content: "";
   position: fixed;
   inset: 0;
   pointer-events: none;
+  z-index: 2;
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
-  background-size: 112px 112px;
-  mask-image: radial-gradient(circle at center, black 35%, transparent 88%);
-  opacity: 0.28;
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 120px 120px;
+  opacity: 0.4;
+  mix-blend-mode: overlay;
 }
 
 a {
@@ -52,13 +61,14 @@ select {
   font: inherit;
 }
 
+/* Custom scrollbar */
 .scrollbar-thin {
   scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.16) transparent;
+  scrollbar-color: rgba(16, 185, 129, 0.2) transparent;
 }
 
 .scrollbar-thin::-webkit-scrollbar {
-  width: 9px;
+  width: 5px;
 }
 
 .scrollbar-thin::-webkit-scrollbar-track {
@@ -66,6 +76,23 @@ select {
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(16, 185, 129, 0.2);
   border-radius: 999px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: rgba(16, 185, 129, 0.35);
+}
+
+/* Gradient text utility */
+.gradient-text {
+  background: linear-gradient(135deg, #f0fdf4 0%, #6ee7b7 40%, #818cf8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Glow accent for focused/active elements */
+.glow-accent {
+  box-shadow: 0 0 20px var(--accent-glow), 0 0 40px rgba(16, 185, 129, 0.06);
 }

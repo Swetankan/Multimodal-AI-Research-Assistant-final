@@ -10,15 +10,16 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        background: "#09090b",
-        panel: "#101216",
-        panelSoft: "#161922",
-        accent: "#9AE6B4",
-        accentStrong: "#64d29a",
-        userBubble: "#1f3b31",
-        assistantBubble: "#111827",
-        borderSoft: "rgba(255,255,255,0.08)",
-        thinkingGreen: "#10a37f"
+        background: "#050608",
+        panel: "#0a0d12",
+        panelSoft: "#0f1318",
+        accent: "#10b981",        /* emerald-500 — vivid green */
+        accentLight: "#34d399",   /* emerald-400 */
+        accentStrong: "#059669",  /* emerald-600 */
+        userBubble: "#0d2b20",
+        assistantBubble: "#090d14",
+        borderSoft: "rgba(255,255,255,0.07)",
+        thinkingGreen: "#10b981"
       },
       boxShadow: {
         glow: "0 20px 45px rgba(0, 0, 0, 0.35)",

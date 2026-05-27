@@ -79,10 +79,11 @@ export function Sidebar({
 
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-40 flex shrink-0 flex-col border-r border-white/8 bg-[#090a0f]/68 backdrop-blur-lg transition-all duration-300 lg:static lg:z-0",
+          "fixed inset-y-0 left-0 z-40 flex shrink-0 flex-col border-r border-emerald-500/10 bg-black/60 backdrop-blur-2xl backdrop-saturate-150 transition-all duration-300 lg:static lg:z-0",
           isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
           isCollapsed ? "w-[78px]" : "w-[280px]"
         )}
+        style={{ boxShadow: 'inset -1px 0 0 0 rgba(16,185,129,0.07)' }}
       >
         <div className={cn("flex items-center px-4 py-4", isCollapsed ? "justify-center" : "justify-between")}>
           {!isCollapsed ? (

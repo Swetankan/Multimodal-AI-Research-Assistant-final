@@ -499,8 +499,9 @@ export function ChatWindow() {
         : `${selectedDocuments.length} documents selected`;
 
   return (
-    <div className="flex h-screen overflow-hidden bg-transparent text-white">
-      <ParticlesBackground />
+    <>
+    <ParticlesBackground />
+    <div className="relative z-[1] flex h-screen overflow-hidden bg-transparent text-white">
       <Sidebar
         provider={provider}
         model={model}
@@ -529,7 +530,7 @@ export function ChatWindow() {
       />
 
       <main className="relative flex min-w-0 flex-1 flex-col overflow-hidden">
-        <header className="sticky top-0 z-20 flex h-14 shrink-0 items-center justify-between border-b border-white/5 bg-[#090a0f]/45 px-3 backdrop-blur-lg sm:px-6 lg:px-8">
+        <header className="sticky top-0 z-20 flex h-14 shrink-0 items-center justify-between border-b border-emerald-500/10 bg-black/40 px-3 backdrop-blur-xl backdrop-saturate-150 sm:px-6 lg:px-8" style={{boxShadow: '0 1px 0 0 rgba(16,185,129,0.08), inset 0 1px 0 0 rgba(255,255,255,0.04)'}}>
           <div className="flex min-w-0 items-center gap-3">
             <button
               type="button"
@@ -626,11 +627,11 @@ export function ChatWindow() {
                     : "max-h-[420px] min-h-[28vh] translate-y-0 opacity-100 sm:max-h-[440px] sm:min-h-[34vh]"
                 ].join(" ")}
               >
-                <h1 className="max-w-3xl text-3xl font-semibold tracking-tight text-white sm:text-5xl lg:text-6xl">
+                <h1 className="gradient-text max-w-3xl text-3xl font-bold tracking-tight sm:text-5xl lg:text-[3.5rem] lg:leading-tight">
                   {greeting}
                 </h1>
-                <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-400 sm:mt-5 sm:text-lg sm:leading-8">
-                  Upload a PDF, tune retrieval, and stream grounded answers in a clean research conversation.
+                <p className="mt-5 max-w-2xl text-sm leading-7 text-slate-400/90 sm:mt-6 sm:text-base sm:leading-8">
+                  Upload a research paper, tune retrieval settings, and get grounded AI answers — powered by hybrid RAG.
                 </p>
                 {documents.length >= 2 ? (
                   <div className="mt-6 flex flex-col items-center gap-3">
@@ -677,5 +678,6 @@ export function ChatWindow() {
         </div>
       </main>
     </div>
+    </>
   );
 }
