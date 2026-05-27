@@ -16,6 +16,7 @@ import {
 import { InputBar } from "./InputBar";
 import { MessageBubble } from "./MessageBubble";
 import { QueryMode, Sidebar } from "./Sidebar";
+import { ParticlesBackground } from "./ParticlesBackground";
 
 const APP_TITLE = "Multimodal AI Research Assistant";
 const THINKING_TITLE = "Thinking...";
@@ -499,6 +500,7 @@ export function ChatWindow() {
 
   return (
     <div className="flex h-screen overflow-hidden bg-transparent text-white">
+      <ParticlesBackground />
       <Sidebar
         provider={provider}
         model={model}
@@ -527,7 +529,7 @@ export function ChatWindow() {
       />
 
       <main className="relative flex min-w-0 flex-1 flex-col overflow-hidden">
-        <header className="sticky top-0 z-20 flex h-14 shrink-0 items-center justify-between border-b border-white/8 bg-[#09090bf2] px-3 backdrop-blur-xl sm:px-6 lg:px-8">
+        <header className="sticky top-0 z-20 flex h-14 shrink-0 items-center justify-between border-b border-white/5 bg-[#090a0f]/45 px-3 backdrop-blur-lg sm:px-6 lg:px-8">
           <div className="flex min-w-0 items-center gap-3">
             <button
               type="button"
