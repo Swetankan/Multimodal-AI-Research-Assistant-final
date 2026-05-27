@@ -6,11 +6,13 @@ import re
 from collections import Counter
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Iterable
+from typing import TYPE_CHECKING, Any, Iterable
 
-import faiss
 import numpy as np
-from sentence_transformers import SentenceTransformer
+
+# Heavy ML libs are imported lazily inside methods to keep startup RAM < 512 MB
+# faiss  → loaded inside load() / add_texts()
+# sentence_transformers → loaded inside _get_encoder()
 
 
 @dataclass
@@ -29,7 +31,7 @@ class RetrievedChunk:
     source_type: str = "text"
 
 
-_ENCODER_CACHE: dict[str, SentenceTransformer] = {}
+_ENCODER_CACHE: dict[str, Any] = {}  # str → SentenceTransformer, loaded lazily
 
 
 class FaissVectorStore:
@@ -43,7 +45,7 @@ class FaissVectorStore:
         self.storage_dir.mkdir(parents=True, exist_ok=True)
         self.index_path = self.storage_dir / "faiss.index"
         self.metadata_path = self.storage_dir / "chunks.json"
-        self.index: faiss.IndexFlatIP | None = None
+        self.index: Any = None  # faiss.IndexFlatIP, loaded lazily
         self.chunks: list[RetrievedChunk] = []
         self.load()
 
@@ -56,8 +58,9 @@ class FaissVectorStore:
         self.index_path.unlink(missing_ok=True)
         self.metadata_path.unlink(missing_ok=True)
 
-    def _get_encoder(self) -> SentenceTransformer:
+    def _get_encoder(self):
         if self.embedding_model_name not in _ENCODER_CACHE:
+            from sentence_transformers import SentenceTransformer  # lazy — loads PyTorch only on first use
             _ENCODER_CACHE[self.embedding_model_name] = SentenceTransformer(self.embedding_model_name)
         return _ENCODER_CACHE[self.embedding_model_name]
 
@@ -83,6 +86,7 @@ class FaissVectorStore:
 
         embeddings = self._embed(texts)
         if self.index is None:
+            import faiss  # lazy — only loads when first document is uploaded
             self.index = faiss.IndexFlatIP(embeddings.shape[1])
         self.index.add(embeddings)
         for offset, text in enumerate(texts, start=1):
@@ -109,6 +113,7 @@ class FaissVectorStore:
         if self.index is None:
             return
 
+        import faiss  # lazy
         faiss.write_index(self.index, str(self.index_path))
         payload = {
             "embedding_model": self.embedding_model_name,
@@ -120,6 +125,7 @@ class FaissVectorStore:
         if not self.index_path.exists() or not self.metadata_path.exists():
             return False
 
+        import faiss  # lazy
         self.index = faiss.read_index(str(self.index_path))
         payload = json.loads(self.metadata_path.read_text(encoding="utf-8"))
         self.embedding_model_name = payload.get("embedding_model", self.embedding_model_name)
@@ -209,6 +215,7 @@ class FaissVectorStore:
             return removed_count
 
         embeddings = self._embed([chunk.text for chunk in self.chunks])
+        import faiss  # lazy
         self.index = faiss.IndexFlatIP(embeddings.shape[1])
         self.index.add(embeddings)
         self.save()
