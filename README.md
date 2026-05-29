@@ -14,13 +14,6 @@ The system lets a user:
 
 The current implementation is optimized for a strong single-user capstone demonstration and viva discussion.
 
-## Report
-
-Project report files generated for submission:
-
-- `Multimodal AI Research Assistant using Retrieval-Augmented Generation (RAG) - Final Report.docx`
-- `Multimodal AI Research Assistant using Retrieval-Augmented Generation (RAG) - Final Report.md`
-
 ## Tech Stack
 
 Frontend:
